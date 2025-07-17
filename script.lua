@@ -1,48 +1,46 @@
--- Vérifie qu'on est bien dans Blox Fruits (1er monde)
-if game.PlaceId ~= 2753915549 then
-    return warn("Ce script fonctionne uniquement dans Blox Fruits (1er monde).")
-end
+--[[
+✅ Script fait pour KRNL, Hydrogen, Arceus X, Delta (mobile compatible)
+🎮 Blox Fruits | Simple Auto Farm UI
+--]]
 
--- GUI Setup
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "CustomBFGui"
-gui.Parent = player:WaitForChild("PlayerGui")
-gui.ResetOnSpawn = false
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local ToggleFarm = Instance.new("TextButton")
 
--- Fonction utilitaire pour créer un bouton
-local function createButton(name, positionY, text, callback)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 200, 0, 40)
-    button.Position = UDim2.new(0, 20, 0, positionY)
-    button.BackgroundColor3 = Color3.fromRGB(35, 35, 80)
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.Font = Enum.Font.SourceSansBold
-    button.TextSize = 18
-    button.Text = text
-    button.Name = name
-    button.Parent = gui
-    button.MouseButton1Click:Connect(callback)
-end
+-- UI Setup
+ScreenGui.Parent = game.CoreGui
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0, 10, 0, 10)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
 
--- Fonction de TP
-local function tpTo(position)
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = CFrame.new(position)
-end
+ToggleFarm.Size = UDim2.new(0, 180, 0, 40)
+ToggleFarm.Position = UDim2.new(0, 10, 0, 30)
+ToggleFarm.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+ToggleFarm.TextColor3 = Color3.new(1, 1, 1)
+ToggleFarm.Text = "Activer Auto-Farm"
+ToggleFarm.Parent = Frame
 
--- Boutons (avec bons décalages Y)
-createButton("TPMiddle", 0.2, "📍 TP Middle Town", function()
-    tpTo(Vector3.new(-655.8, 7.8, 1434.7))
+-- Logic
+local farming = false
+
+ToggleFarm.MouseButton1Click:Connect(function()
+    farming = not farming
+    ToggleFarm.Text = farming and "Stop Auto-Farm" or "Activer Auto-Farm"
+
+    while farming do
+        pcall(function()
+            local plr = game.Players.LocalPlayer
+            local mob = game:GetService("Workspace").Enemies:FindFirstChildWhichIsA("Model")
+            if mob then
+                repeat
+                    plr.Character.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                    game:GetService("VirtualInputManager"):SendKeyEvent(true, "E", false, game)
+                    wait(0.5)
+                until mob.Humanoid.Health <= 0 or not farming
+            end
+        end)
+        wait(0.5)
+    end
 end)
-
-createButton("TPJungle", 0.3, "📍 TP Jungle", function()
-    tpTo(Vector3.new(-1249.7, 11.8, 341.4))
-end)
-
-createButton("Fermer", 0.4, "❌ Fermer le GUI", function()
-    gui:Destroy()
-end)
-
-print("✅ GUI chargé avec succès !")
